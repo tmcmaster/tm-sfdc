@@ -1,0 +1,115 @@
+<!-- <link rel="import" href="../polymer/polymer.html"> -->
+<link rel="import" href="elements.html">
+
+<!--
+`tm-sfdc`
+
+
+@demo demo/index.html
+-->
+
+<dom-module id="tm-sfdc">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Connecting to SalesForce</h2>
+    <script src="bower_components/jsforce/build/jsforce.js"></script>
+
+    <!-- body='{"grant_type":"password","client_id":"3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT","client_secret":"1252403411153362779","username":"scp_int@iselect.com.au","password":"iSelect100yXIocnUsXxI9blNJ0VpHxRpyp"}' -->
+    <!-- body="grant_type=password&client_id=3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT&client_secret=1252403411153362779&username=scp_int@iselect.com.au&password=iSelect100yXIocnUsXxI9blNJ0VpHxRpyp" -->
+
+    <iron-ajax
+      auto
+      method="POST"
+      url="[[url]]"
+      body="grant_type=password&client_id=3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT&client_secret=1252403411153362779&username=scp_int@iselect.com.au&password=iSelect100yXIocnUsXxI9blNJ0VpHxRpyp"
+      handle-as="application/json"
+      last-response="lastRespone"
+      on-response="handleResponse">
+    </iron-ajax>
+
+    <iron-ajax
+      auto
+      method="GET"
+      url="[[response.instance_url]]/services/data/v37.0/"
+      handle-as="json"
+      headers="[[computeHeader(response)]]"
+      last-response="lastRespone2"
+      on-response="handleResponse2"></iron-ajax>
+
+    <!-- curl https://yourInstance.salesforce.com/services/data/v20.0/sobjects/Account/ -H "Authorization: Bearer token -H "Content-Type: application/json" -d "@newaccount.json" -->
+    <!-- curl https://cs6.salesforce.com/services/data/v37.0/sobjects/ -H "Authorization: Bearer token" -->
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'tm-sfdc',
+      properties: {
+        header: {
+
+        },
+        login: {
+          type: Object,
+          notify: true,
+          value: {
+            "grant_type":"password",
+            "client_id":"3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT",
+            "client_secret":"1252403411153362779",
+            "username":"scp_int@iselect.com.au",
+            "password":"iSelect100yXIocnUsXxI9blNJ0VpHxRpyp"
+          }
+        },
+        url: {
+          type: String,
+          notify: true,
+          value: 'https://cs6.salesforce.com/services/oauth2/token'
+        },
+        response: {
+          type: Object,
+          notify: true,
+          value: {}
+        },
+        response2: {
+          type: Object,
+          notify: true,
+          value: {}
+        }
+      },
+      observers: [
+        'responseChanged(response)',
+        'response2Changed(response2)'
+      ],
+      computeHeader: function(response) {
+        return {'Authorization': 'Bearer ' + response.access_token}
+      },
+      responseChanged: function(response) {
+        console.log('RESPONSE: ', response);
+      },
+      response2Changed: function(response2) {
+        console.log('RESPONSE2: ', response2);
+      },
+      lastResponse: function(resonse) {
+        console.log('LAST_RESPONSE: ', response);
+        this.response = response;
+      },
+      handleResponse: function(response) {
+        console.log('HANDLE_RESPONSE: ', response);
+        this.response = JSON.parse(response.detail.__data__.response);
+      },
+      lastResponse2: function(resonse) {
+        console.log('LAST_RESPONSE2: ', response);
+      },
+      handleResponse2: function(response) {
+        console.log('HANDLE_RESPONSE2: ', response);
+        this.response2 = response.detail.__data__.response;
+      },
+      ready: function() {
+        console.log('Created tm-sfdc component.');
+      }
+    });
+  </script>
+</dom-module>
