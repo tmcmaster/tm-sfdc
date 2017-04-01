@@ -1,0 +1,4 @@
+<!-- body='{"grant_type":"password","client_id":"3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT","client_secret":"1252403411153362779","username":"scp_int@iselect.com.au","password":"iSelect100yXIocnUsXxI9blNJ0VpHxRpyp"}' -->
+<!-- body="grant_type=password&client_id=3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT&client_secret=1252403411153362779&username=scp_int@iselect.com.au&password=iSelect100yXIocnUsXxI9blNJ0VpHxRpyp" -->
+<!-- curl https://yourInstance.salesforce.com/services/data/v20.0/sobjects/Account/ -H "Authorization: Bearer token -H "Content-Type: application/json" -d "@newaccount.json" -->
+<!-- curl https://cs6.salesforce.com/services/data/v37.0/sobjects/ -H "Authorization: Bearer token" -->

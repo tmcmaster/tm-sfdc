@@ -1,0 +1,47 @@
+
+<dom-module id="tm-sfdc-login">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <iron-ajax id="login" auto
+      method="POST" url="[[url]]"
+      content-type="application/x-www-form-urlencoded"
+      body="[[_buildBody(clientId,clientSecret,username,password)]]"
+      handle-as="json" last-response="{{response}}">
+    </iron-ajax>
+  </template>
+  <script>
+    (function(Polymer) {
+      Polymer({
+        is: 'tm-sfdc-login',
+        properties: {
+          url: { type: String, notify: true },
+          clientId: { type: String, notify: true },
+          clientSecret : { type: String, notify: true },
+          username: { type: String, notify: true },
+          password: { type: String, notify: true },
+          response: { type: Object, notify: true },
+          errorMessage: { type: String, notify:true }
+        },
+        observers: [
+          '_debug(url)'
+        ],
+        _buildBody: function(clientId,clientSecret,username,password) {
+          return "grant_type=password&client_id=" + clientId
+                + "&client_secret=" + clientSecret
+                + "&username=" + username
+                + "&password=" + password;
+        },
+        _debug: function(object) {
+          console.log('----- LOGIN DEBUG: ', object);
+        },
+        ready: function() {
+          console.log('Element tm-sfdc-login has been created.');
+        }
+      });
+    })(window.Polymer);
+  </script>
+</dom-module>

@@ -1,0 +1,33 @@
+<link rel="import" href="../tm-sfdc.html">
+<dom-module id="demo-tm-sfdc">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <tm-sfdc></tm-sfdc>
+  </template>
+  <script>
+    (function(Polymer) {
+      Polymer({
+        is: 'demo-tm-sfdc',
+        properties: {
+          props: {
+            type:String,
+            notify:true
+          }
+        },
+        observers: [
+          'debug(props)'
+        ],
+        debug: function(object) {
+          console.log(object);
+        },
+        ready: function() {
+          console.log('Element demo-tm-sfdc has been created.');
+        }
+      });
+    })(window.Polymer);
+  </script>
+</dom-module>

@@ -1,5 +1,10 @@
-<!-- <link rel="import" href="../polymer/polymer.html"> -->
-<link rel="import" href="elements.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
+
+<link rel="import" href="elements/tm-jsforce.html">
+
+<link rel="import" href="tm-sfdc-login.html">
+<link rel="import" href="tm-sfdc-services.html">
 
 <!--
 `tm-sfdc`
@@ -16,32 +21,37 @@
       }
     </style>
     <h2>Connecting to SalesForce</h2>
-    <script src="bower_components/jsforce/build/jsforce.js"></script>
 
-    <!-- body='{"grant_type":"password","client_id":"3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT","client_secret":"1252403411153362779","username":"scp_int@iselect.com.au","password":"iSelect100yXIocnUsXxI9blNJ0VpHxRpyp"}' -->
-    <!-- body="grant_type=password&client_id=3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT&client_secret=1252403411153362779&username=scp_int@iselect.com.au&password=iSelect100yXIocnUsXxI9blNJ0VpHxRpyp" -->
-
-    <iron-ajax
-      auto
-      method="POST"
-      url="[[url]]"
-      body="grant_type=password&client_id=3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT&client_secret=1252403411153362779&username=scp_int@iselect.com.au&password=iSelect100yXIocnUsXxI9blNJ0VpHxRpyp"
-      handle-as="application/json"
-      last-response="lastRespone"
-      on-response="handleResponse">
-    </iron-ajax>
+    <paper-button raised on-tap="_getServices">Get Services</paper-button>
+    <paper-dropdown-menu label="Services">
+      <paper-listbox class="dropdown-content" selected="0">
+        <template is="dom-repeat" items="[[serviceList]]" as="service">
+            <paper-item data-path="[[service.path]]">[[service.name]]</paper-item>
+        </template>
+      </paper-listbox>
+    </paper-dropdown-menu>
 
     <iron-ajax
       auto
       method="GET"
-      url="[[response.instance_url]]/services/data/v37.0/"
+      url="private/login-data.json"
       handle-as="json"
-      headers="[[computeHeader(response)]]"
-      last-response="lastRespone2"
-      on-response="handleResponse2"></iron-ajax>
+      last-response="{{loginData}}">
+    </iron-ajax>
 
-    <!-- curl https://yourInstance.salesforce.com/services/data/v20.0/sobjects/Account/ -H "Authorization: Bearer token -H "Content-Type: application/json" -d "@newaccount.json" -->
-    <!-- curl https://cs6.salesforce.com/services/data/v37.0/sobjects/ -H "Authorization: Bearer token" -->
+    <tm-sfdc-login id="login"
+      url="[[loginData.auth_url]]"
+      client-id="[[loginData.client_id]]"
+      client-secret="[[loginData.client_secret]]"
+      username="[[loginData.username]]"
+      password="[[loginData.password]]"
+      response="{{oAuthData}}"
+      error-message="{{oAuthErrorMessage}}"></tm-sfdc-login>
+
+    <tm-sfdc-services id="services"
+      base-url="[[oAuthData.instance_url]]"
+      access-token="[[oAuthData.access_token]]"
+      service-list="{{serviceList}}"></tm-sfdc-services>
 
   </template>
 
@@ -49,63 +59,16 @@
     Polymer({
       is: 'tm-sfdc',
       properties: {
-        header: {
-
-        },
-        login: {
-          type: Object,
-          notify: true,
-          value: {
-            "grant_type":"password",
-            "client_id":"3MVG9Se4BnchkASmtngzNh_R0lfSgiAYWyTacZuXNx_DqO1Ff.Zmw7NeqyIyYatqraABnVkR.gLQR3oIWUlJT",
-            "client_secret":"1252403411153362779",
-            "username":"scp_int@iselect.com.au",
-            "password":"iSelect100yXIocnUsXxI9blNJ0VpHxRpyp"
-          }
-        },
-        url: {
-          type: String,
-          notify: true,
-          value: 'https://cs6.salesforce.com/services/oauth2/token'
-        },
-        response: {
-          type: Object,
-          notify: true,
-          value: {}
-        },
-        response2: {
-          type: Object,
-          notify: true,
-          value: {}
-        }
+        loginData: { type: Object, notify: true },
+        oAuthData: { type: Object, notify: true },
+        oAuthErrorMessage: { type: String, notify: true },
+        serviceList: { type: Array, notify: true, value: [] }
       },
       observers: [
-        'responseChanged(response)',
-        'response2Changed(response2)'
+        '_debug(login)'
       ],
-      computeHeader: function(response) {
-        return {'Authorization': 'Bearer ' + response.access_token}
-      },
-      responseChanged: function(response) {
-        console.log('RESPONSE: ', response);
-      },
-      response2Changed: function(response2) {
-        console.log('RESPONSE2: ', response2);
-      },
-      lastResponse: function(resonse) {
-        console.log('LAST_RESPONSE: ', response);
-        this.response = response;
-      },
-      handleResponse: function(response) {
-        console.log('HANDLE_RESPONSE: ', response);
-        this.response = JSON.parse(response.detail.__data__.response);
-      },
-      lastResponse2: function(resonse) {
-        console.log('LAST_RESPONSE2: ', response);
-      },
-      handleResponse2: function(response) {
-        console.log('HANDLE_RESPONSE2: ', response);
-        this.response2 = response.detail.__data__.response;
+      _debug: function(object) {
+        console.log('SFDC DEBUG: ', object)
       },
       ready: function() {
         console.log('Created tm-sfdc component.');

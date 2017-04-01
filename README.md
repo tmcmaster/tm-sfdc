@@ -1,3 +1,3 @@
-# <tm-sfdc>
+# tm-sfdc
 
 Polymer widget to query SalesForce

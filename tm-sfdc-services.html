@@ -1,0 +1,64 @@
+
+<dom-module id="tm-sfdc-services">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <iron-ajax
+      id="ajax"
+      method="GET"
+      url="[[baseUrl]]/services/data/v37.0/"
+      handle-as="json"
+      headers="[[_computeHeader(accessToken)]]"
+      on-response="_handleResponse"></iron-ajax>
+  </template>
+  <script>
+    (function(Polymer) {
+      Polymer({
+        is: 'tm-sfdc-services',
+        properties: {
+          baseUrl: {
+            type:String,
+            notify:true
+          },
+          accessToken: {
+            type: String,
+            notify: true
+          },
+          serviceList: {
+            type: Array,
+            notify: true,
+            value: []
+          }
+        },
+        observers: [
+          '_debug(baseUrl, accessToken)'
+        ],
+        refresh: function() {
+          if (this.baseUrl !== undefined && this.baseUrl !== ''
+              && this.accessToken !== undefined && this.accessToken !== '') {
+            this.$.ajax.generateRequest();
+          }
+        },
+        _handleResponse: function(response) {
+          console.log('RESPONSE--: ', response);
+          const serviceMap = response.detail.__data__.response;
+          const services = Object.keys(serviceMap).map(k => ({name:k, path:serviceMap[k]}));
+          this.serviceList = services;
+        },
+        _computeHeader: function(accessToken) {
+          return {'Authorization': 'Bearer ' + accessToken}
+        },
+        _debug: function(a,b) {
+          console.log('DEBUG', a, b);
+          this.refresh();
+        },
+        ready: function() {
+          console.log('Element tm-sfdc-services has been created.');
+        }
+      });
+    })(window.Polymer);
+  </script>
+</dom-module>
