@@ -1,5 +1,5 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
-<dom-module id="tm-sfdc-services">
+<dom-module id="tm-sfdc-object">
   <template>
     <style>
       :host {
@@ -14,23 +14,23 @@
   <script>
     (function(Polymer) {
       Polymer({
-        is: 'tm-sfdc-services',
+        is: 'tm-sfdc-object',
         properties: {
           baseUrl: { type:String, notify:true },
           accessToken: { type: String, notify: true },
-          serviceList: { type: Array, notify: true, value: [] }
+          objects: { type: Array, notify: true, value: [] }
         },
         observers: [
-          '_debug(serviceList)'
+          '_debug(limits)'
         ],
         _handleResponse: function(response) {
-          console.log('RESPONSE--: ', response);
-          const serviceMap = response.detail.__data__.response;
-          const services = Object.keys(serviceMap).map(k => ({name:k, path:serviceMap[k]}));
-          this.serviceList = services;
+          console.log('LIMITS RESPONSE: ', response);
+          const objects = response.detail.__data__.response.sobjects;
+          console.log('====> OBJECTS: ', objects);
+          this.objects = objects;
         },
         _buildUrl: function(baseUrl) {
-          return baseUrl + '/services/data/v37.0/';
+          return baseUrl + '/services/data/v37.0/sobjects';
         },
         _computeHeader: function(accessToken) {
           return {'Authorization': 'Bearer ' + accessToken}
@@ -39,7 +39,7 @@
           console.log('DEBUG', a, b);
         },
         ready: function() {
-          console.log('Element tm-sfdc-services has been created.');
+          console.log('Element tm-sfdc-object has been created.');
         }
       });
     })(window.Polymer);

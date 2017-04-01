@@ -1,28 +1,220 @@
-<link rel="import" href="../tm-sfdc.html">
+<link rel="import" href="../bower_components/tm-app-structure/tm-app-structure.html">
+<link rel="import" href="../tm-sfdc-login.html">
+<link rel="import" href="../tm-sfdc-services.html">
+<link rel="import" href="../tm-sfdc-limits.html">
+<link rel="import" href="../tm-sfdc-object.html">
+
 <dom-module id="demo-tm-sfdc">
   <template>
     <style>
       :host {
-        display: block;
+        display: inline-block;
       }
+      div.page {
+        padding: 20px;
+        width:100%;
+        overflow: scroll;
+      }
+      span.path {
+        padding-left: 15px;
+      }
+      table.limits {
+        width: 100%;
+      }
+      th,td {
+        padding:2px;
+      }
+      th {
+        width:50%;
+        padding-bottom: 5px;
+      }
+      table.limits > th,td {
+        text-align: left;
+        padding-left: 10px;
+      }
+      table.limits > th:first-of-type, table.limits > td:first-of-type {
+        text-align: right;
+        padding-right: 10px;
+      }
+      .active-true {
+        color:blue;
+      }
+
+      /*table.objects th {
+          height: 166px;
+          min-width: 10px;
+          max-width:30px;
+          padding:1px;
+          margin:0px;
+      }
+
+      table.objects th span {
+          display: block;
+          -webkit-transform: rotate(-90deg);
+          -moz-transform: rotate(-90deg);
+          -o-transform: rotate(-90deg);
+          -ms-transform: rotate(-90deg);
+          transform: rotate(-90deg);
+          font-weight: normal;
+          text-transform: uppercase;
+          max-width: 150px;
+          height:30px;
+          left:-30px;
+      }*/
     </style>
-    <tm-sfdc></tm-sfdc>
+
+    <iron-ajax
+      auto
+      method="GET"
+      url="../private/login-data.json"
+      handle-as="json"
+      last-response="{{loginData}}"></iron-ajax>
+
+    <tm-sfdc-login
+      url="[[loginData.auth_url]]"
+      client-id="[[loginData.client_id]]"
+      client-secret="[[loginData.client_secret]]"
+      username="[[loginData.username]]"
+      password="[[loginData.password]]"
+      response="{{oAuthData}}"
+      error-message="{{oAuthErrorMessage}}"></tm-sfdc-login>
+
+    <tm-sfdc-services
+      base-url="[[oAuthData.instance_url]]"
+      access-token="[[oAuthData.access_token]]"
+      service-list="{{serviceList}}"></tm-sfdc-services>
+
+    <tm-sfdc-limits
+      base-url="[[oAuthData.instance_url]]"
+      access-token="[[oAuthData.access_token]]"
+      limits="{{limits}}"></tm-sfdc-limits>
+
+    <tm-sfdc-object
+      base-url="[[oAuthData.instance_url]]"
+      access-token="[[oAuthData.access_token]]"
+      objects="{{objects}}"></tm-sfdc-object>
+
+    <tm-app-structure app-title="SalesForce Browser" titles="Services,Limits,Objects" selected="1">
+      <div  class="page">
+        <paper-dropdown-menu label="Services">
+          <paper-listbox class="dropdown-content" selected="{{selectedService}}">
+            <template is="dom-repeat" items="[[serviceList]]" as="service">
+              <paper-item data-path="[[service.path]]">[[service.name]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <span class="path">[[_getServicePath(serviceList,selectedService)]]</span>
+      </div>
+      <div class="page">
+        <table class="limits">
+          <tr>
+            <th>Limit</th>
+            <th>Remaining</th>
+          </tr>
+          <template is="dom-repeat" items="[[limits]]" as="limit">
+            <tr class$="active-[[_isActive(limit)]]">
+              <td>[[limit.name]]</td>
+              <td>([[limit.remaining]] of [[limit.max]])</td>
+            </tr>
+          </template>
+        </table>
+      </div>
+      <div class="page">
+        <table class="objects">
+          <thead>
+            <tr>
+              <th></th>
+              <th><span>activateable</span></th>
+              <th><span>createable</span></th>
+              <th><span>custom</span></th>
+              <th><span>customSetting</span></th>
+              <th><span>deletable</span></th>
+              <th><span>deprecatedAndHidden</span></th>
+              <th><span>feedEnabled</span></th>
+              <th><span>keyPrefix</span></th>
+              <th><span>label</span></th>
+              <th><span>labelPlural</span></th>
+              <th><span>layoutable</span></th>
+              <th><span>mergeable</span></th>
+              <th><span>mruEnabled</span></th>
+              <th><span>name</span></th>
+              <th><span>queryable</span></th>
+              <th><span>replicateable</span></th>
+              <th><span>retrieveable</span></th>
+              <th><span>searchable</span></th>
+              <th><span>triggerable</span></th>
+              <th><span>undeletable</span></th>
+              <th><span>updatea</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template is="dom-repeat" items="[[objects]]" as="item">
+              <tr>
+                <th>[[item.label]]</th>
+                <td>[[item.activateable]]</td>
+                <td>[[item.createable]]</td>
+                <td>[[item.custom]]</th>
+                <td>[[item.customSetting]]</th>
+                <td>[[item.deletable]]</th>
+                <td>[[item.deprecatedAndHidden]]</th>
+                <td>[[item.feedEnabled]]</th>
+                <td>[[item.keyPrefix]]</th>
+                <td>[[item.label]]</th>
+                <td>[[item.labelPlural]]</th>
+                <td>[[item.layoutable]]</th>
+                <td>[[item.mergeable]]</th>
+                <td>[[item.mruEnabled]]</th>
+                <td>[[item.name]]</th>
+                <td>[[item.queryable]]</th>
+                <td>[[item.replicateable]]</th>
+                <td>[[item.retrieveable]]</th>
+                <td>[[item.searchable]]</th>
+                <td>[[item.triggerable]]</th>
+                <td>[[item.undeletable]]</th>
+                <td>[[item.updatea]]</th>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+        <!-- <iron-list items="[[objects]]">
+          <template>
+            <paper-card heading="[[item.label]]">
+              <div class="card-content">
+                <paper-checkbox disabled label="activateable" checked="[[item.activateable]]"></paper-input>
+                <paper-input label="createable" chec="{{item.createable}}"></paper-input>
+              </div>
+            </paper-card>
+          </template>
+        </iron-list> -->
+      </div>
+    </tm-app-structure>
+
   </template>
   <script>
     (function(Polymer) {
       Polymer({
         is: 'demo-tm-sfdc',
         properties: {
-          props: {
-            type:String,
-            notify:true
-          }
+          loginData: { type: Object, notify: true },
+          oAuthData: { type: Object, notify: true },
+          oAuthErrorMessage: { type: String, notify: true },
+          serviceList: { type: Array, notify: true, value: [] },
+          limits: { type: Array, notify: true, value: [] },
+          objects: { type: Array, notify: true, value: [] },
+          selectedService: { type: Number, notify: true, value: 0 }
         },
         observers: [
-          'debug(props)'
+          'debug(objects)'
         ],
+        _isActive: function(limit) {
+          return (limit.remaining < limit.max);
+        },
+        _getServicePath: function(serviceList,selectedService) {
+          return (serviceList === undefined || serviceList.length <= selectedService
+            ? '' : this.oAuthData.instance_url + '/' + serviceList[selectedService].path);
+        },
         debug: function(object) {
-          console.log(object);
+          console.log("--- OBJECTS: ", object);
         },
         ready: function() {
           console.log('Element demo-tm-sfdc has been created.');

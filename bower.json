@@ -4,7 +4,9 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
     "paper-elements": "^1.0.7",
-    "iron-elements": "^1.0.10"
+    "iron-elements": "^1.0.10",
+    "jsforce": "^1.7.1",
+    "tm-app-structure": "tmcmaster/tm-app-structure"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
