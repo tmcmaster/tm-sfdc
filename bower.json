@@ -2,11 +2,12 @@
   "name": "tm-sfdc",
   "main": "tm-sfdc.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.4.0",
+    "polymer": "Polymer/polymer#^1.8.1",
     "paper-elements": "^1.0.7",
     "iron-elements": "^1.0.10",
     "jsforce": "^1.7.1",
-    "tm-app-structure": "tmcmaster/tm-app-structure"
+    "tm-app-structure": "tmcmaster/tm-app-structure",
+    "paper-datatable": "^0.9.8"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

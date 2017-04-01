@@ -1,4 +1,6 @@
 <link rel="import" href="../bower_components/tm-app-structure/tm-app-structure.html">
+<link rel="import" href="../bower_components/paper-datatable/paper-datatable.html">
+<link rel="import" href="../bower_components/paper-datatable/paper-datatable-column.html">
 <link rel="import" href="../tm-sfdc-login.html">
 <link rel="import" href="../tm-sfdc-services.html">
 <link rel="import" href="../tm-sfdc-limits.html">
@@ -12,8 +14,11 @@
       }
       div.page {
         padding: 20px;
-        width:100%;
+        min-width:900px;
+        width:900px;
         overflow: scroll;
+        margin-left:auto;
+        margin-right: auto;
       }
       span.path {
         padding-left: 15px;
@@ -28,11 +33,11 @@
         width:50%;
         padding-bottom: 5px;
       }
-      table.limits > th,td {
+      table.limits th, table.limits th td {
         text-align: left;
         padding-left: 10px;
       }
-      table.limits > th:first-of-type, table.limits > td:first-of-type {
+      table.limits th:first-of-type, table.limits td:first-of-type {
         text-align: right;
         padding-right: 10px;
       }
@@ -40,27 +45,15 @@
         color:blue;
       }
 
-      /*table.objects th {
-          height: 166px;
-          min-width: 10px;
-          max-width:30px;
-          padding:1px;
-          margin:0px;
+      table.services th:first-of-type, table.services td:first-of-type{
+        text-align: right;
+        padding-right: 10px;
       }
 
-      table.objects th span {
-          display: block;
-          -webkit-transform: rotate(-90deg);
-          -moz-transform: rotate(-90deg);
-          -o-transform: rotate(-90deg);
-          -ms-transform: rotate(-90deg);
-          transform: rotate(-90deg);
-          font-weight: normal;
-          text-transform: uppercase;
-          max-width: 150px;
-          height:30px;
-          left:-30px;
-      }*/
+      table.services th, table.limits th td {
+        text-align: left;
+        padding-left: 10px;
+      }
     </style>
 
     <iron-ajax
@@ -94,23 +87,24 @@
       access-token="[[oAuthData.access_token]]"
       objects="{{objects}}"></tm-sfdc-object>
 
-    <tm-app-structure app-title="SalesForce Browser" titles="Services,Limits,Objects" selected="1">
-      <div  class="page">
-        <paper-dropdown-menu label="Services">
-          <paper-listbox class="dropdown-content" selected="{{selectedService}}">
-            <template is="dom-repeat" items="[[serviceList]]" as="service">
-              <paper-item data-path="[[service.path]]">[[service.name]]</paper-item>
-            </template>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <span class="path">[[_getServicePath(serviceList,selectedService)]]</span>
+    <tm-app-structure app-title="SalesForce Browser" titles="Settings,Services,Limits,Objects" selected="0">
+      <div class="page">
+        <paper-input label="Grant Type" value="password" disabled></paper-input>
+        <paper-input label="OAuth2 URL" value="{{loginData.auth_url}}"></paper-input>
+        <paper-input label="Client ID" value="{{loginData.client_id}}"></paper-input>
+        <paper-input label="Client Secret" value="{{loginData.client_secret}}"></paper-input>
+        <paper-input label="User Name" value="{{loginData.username}}"></paper-input>
+        <paper-input label="Password" value="{{loginData.password}}"></paper-input>
+      </div>
+      <div class="page">
+        <paper-datatable data="{{serviceList}}" selectable multi-selection>
+            <paper-datatable-column header="Name" property="name" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+            <paper-datatable-column header="Path" property="path" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+        </paper-datatable>
       </div>
       <div class="page">
         <table class="limits">
-          <tr>
-            <th>Limit</th>
-            <th>Remaining</th>
-          </tr>
+          <tr><th>Limit</th><th>Remaining</th></tr>
           <template is="dom-repeat" items="[[limits]]" as="limit">
             <tr class$="active-[[_isActive(limit)]]">
               <td>[[limit.name]]</td>
@@ -120,72 +114,28 @@
         </table>
       </div>
       <div class="page">
-        <table class="objects">
-          <thead>
-            <tr>
-              <th></th>
-              <th><span>activateable</span></th>
-              <th><span>createable</span></th>
-              <th><span>custom</span></th>
-              <th><span>customSetting</span></th>
-              <th><span>deletable</span></th>
-              <th><span>deprecatedAndHidden</span></th>
-              <th><span>feedEnabled</span></th>
-              <th><span>keyPrefix</span></th>
-              <th><span>label</span></th>
-              <th><span>labelPlural</span></th>
-              <th><span>layoutable</span></th>
-              <th><span>mergeable</span></th>
-              <th><span>mruEnabled</span></th>
-              <th><span>name</span></th>
-              <th><span>queryable</span></th>
-              <th><span>replicateable</span></th>
-              <th><span>retrieveable</span></th>
-              <th><span>searchable</span></th>
-              <th><span>triggerable</span></th>
-              <th><span>undeletable</span></th>
-              <th><span>updatea</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <template is="dom-repeat" items="[[objects]]" as="item">
-              <tr>
-                <th>[[item.label]]</th>
-                <td>[[item.activateable]]</td>
-                <td>[[item.createable]]</td>
-                <td>[[item.custom]]</th>
-                <td>[[item.customSetting]]</th>
-                <td>[[item.deletable]]</th>
-                <td>[[item.deprecatedAndHidden]]</th>
-                <td>[[item.feedEnabled]]</th>
-                <td>[[item.keyPrefix]]</th>
-                <td>[[item.label]]</th>
-                <td>[[item.labelPlural]]</th>
-                <td>[[item.layoutable]]</th>
-                <td>[[item.mergeable]]</th>
-                <td>[[item.mruEnabled]]</th>
-                <td>[[item.name]]</th>
-                <td>[[item.queryable]]</th>
-                <td>[[item.replicateable]]</th>
-                <td>[[item.retrieveable]]</th>
-                <td>[[item.searchable]]</th>
-                <td>[[item.triggerable]]</th>
-                <td>[[item.undeletable]]</th>
-                <td>[[item.updatea]]</th>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-        <!-- <iron-list items="[[objects]]">
-          <template>
-            <paper-card heading="[[item.label]]">
-              <div class="card-content">
-                <paper-checkbox disabled label="activateable" checked="[[item.activateable]]"></paper-input>
-                <paper-input label="createable" chec="{{item.createable}}"></paper-input>
-              </div>
-            </paper-card>
-          </template>
-        </iron-list> -->
+        <paper-datatable data="{{objects}}" selectable multi-selection>
+          <paper-datatable-column header="name" property="name" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="label" property="label" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="labelPlural" property="labelPlural" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="activateable" property="activateable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="createable" property="createable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="custom" property="custom" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="customSetting" property="customSetting" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="deletable" property="deletable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="deprecatedAndHidden" property="deprecatedAndHidden" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="keyPrefix" property="keyPrefix" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="layoutable" property="layoutable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="mergeable" property="mergeable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="mruEnabled" property="mruEnabled" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="queryable" property="queryable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="replicateable" property="replicateable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="retrieveable" property="retrieveable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="searchable" property="searchable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="triggerable" property="triggerable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="undeletable" property="undeletable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="updateable" property="updateable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+        </paper-datatable>
       </div>
     </tm-app-structure>
 
