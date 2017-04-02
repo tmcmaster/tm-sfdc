@@ -5,6 +5,8 @@
 <link rel="import" href="../tm-sfdc-services.html">
 <link rel="import" href="../tm-sfdc-limits.html">
 <link rel="import" href="../tm-sfdc-object.html">
+<link rel="import" href="../tm-sfdc-relevant.html">
+<link rel="import" href="../tm-sfdc-instance.html">
 
 <dom-module id="demo-tm-sfdc">
   <template>
@@ -72,22 +74,36 @@
       response="{{oAuthData}}"
       error-message="{{oAuthErrorMessage}}"></tm-sfdc-login>
 
-    <tm-sfdc-services
+    <!-- <tm-sfdc-services
       base-url="[[oAuthData.instance_url]]"
       access-token="[[oAuthData.access_token]]"
-      service-list="{{serviceList}}"></tm-sfdc-services>
+      service-list="{{serviceList}}"></tm-sfdc-services> -->
 
-    <tm-sfdc-limits
+    <!-- <tm-sfdc-limits
       base-url="[[oAuthData.instance_url]]"
       access-token="[[oAuthData.access_token]]"
-      limits="{{limits}}"></tm-sfdc-limits>
+      limits="{{limits}}"></tm-sfdc-limits> -->
 
-    <tm-sfdc-object
+    <!-- <tm-sfdc-object
       base-url="[[oAuthData.instance_url]]"
       access-token="[[oAuthData.access_token]]"
-      objects="{{objects}}"></tm-sfdc-object>
+      objects="{{objects}}"></tm-sfdc-object> -->
 
-    <tm-app-structure app-title="SalesForce Browser" titles="Settings,Services,Limits,Objects" selected="0">
+    <tm-sfdc-relevant
+      base-url="[[oAuthData.instance_url]]"
+      access-token="[[oAuthData.access_token]]"
+      type="Needs_Analysis__c"
+      id-map="[[relevantIdMap]]"
+      id-list="{{relevantIdList}}"></tm-sfdc-relevant>
+
+    <tm-sfdc-instance
+      base-url="[[oAuthData.instance_url]]"
+      access-token="[[oAuthData.access_token]]"
+      type="Needs_Analysis__c"
+      record-id="[[recordId]]"
+      record="{{record}}"></tm-sfdc-instance>
+
+    <tm-app-structure app-title="SalesForce Browser" titles="Settings,Services,Limits,Objects,Relevant,Record" selected="0">
       <div class="page">
         <paper-input label="Grant Type" value="password" disabled></paper-input>
         <paper-input label="OAuth2 URL" value="{{loginData.auth_url}}"></paper-input>
@@ -137,6 +153,21 @@
           <paper-datatable-column header="updateable" property="updateable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
         </paper-datatable>
       </div>
+      <div class="page">
+        a0ep0000004GkTm
+      </div>
+      <div class="page">
+        <paper-dropdown-menu label="Relevant Object IDs">
+          <paper-listbox class="dropdown-content" selected="{{selectedRelivantId}}">
+            <template is="dom-repeat" items="[[relevantIdList.recordIds]]" as="item">
+              <paper-item>[[item]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <template is="dom-repeat" items="[[_generateRecordData(record)]]" as="field">
+          <paper-input label="[[field.name]]" value="[[field.value]]"></paper-input>
+        </template>
+      </div>
     </tm-app-structure>
 
   </template>
@@ -151,11 +182,27 @@
           serviceList: { type: Array, notify: true, value: [] },
           limits: { type: Array, notify: true, value: [] },
           objects: { type: Array, notify: true, value: [] },
+          relevantIdMap: { type: Object, notify: true, value: {} },
+          relevantIdList: { type: Array, notify: true, value: [] },
+          recordId: { type: String, notify:true, computed: '_computeRecordId(relevantIdList,selectedRelivantId)' },
+          record: { type: Object, notify: true, value: {} },
+          selectedRelivantId: { type: Number, notify: true, value: 0 },
           selectedService: { type: Number, notify: true, value: 0 }
         },
         observers: [
-          'debug(objects)'
+          'debug(recordId)'
         ],
+        _computeRecordId: function(relevantIdList,selectedRelivantId) {
+          if (relevantIdList.recordIds === undefined) {
+            return undefined;
+          }
+          return relevantIdList.recordIds[selectedRelivantId];
+        },
+        _generateRecordData: function(record) {
+          return Object.keys(record)
+            .filter(k => (k !== 'attributes'))
+            .map(k => ({name:k, value:record[k]}));
+        },
         _isActive: function(limit) {
           return (limit.remaining < limit.max);
         },
@@ -163,8 +210,8 @@
           return (serviceList === undefined || serviceList.length <= selectedService
             ? '' : this.oAuthData.instance_url + '/' + serviceList[selectedService].path);
         },
-        debug: function(object) {
-          console.log("--- OBJECTS: ", object);
+        debug: function(a,b,c) {
+          console.log("--- DEMO DEBUG: ", a,b,c);
         },
         ready: function() {
           console.log('Element demo-tm-sfdc has been created.');

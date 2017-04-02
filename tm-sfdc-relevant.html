@@ -1,0 +1,60 @@
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<dom-module id="tm-sfdc-relevant">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <iron-ajax id="ajax" auto
+      method="GET" url="[[_buildUrl(baseUrl,type)]]"
+      headers="[[_computeHeader(accessToken)]]"
+      handle-as="json" on-response="_handleResponse"></iron-ajax>
+  </template>
+  <script>
+    (function(Polymer) {
+      Polymer({
+        is: 'tm-sfdc-relevant',
+        properties: {
+          baseUrl: { type:String, notify:true },
+          type: { type:String, notify:true },
+          accessToken: { type: String, notify: true },
+          idMap: { type: Object, notify: true, value: [] },
+          idList: { type: Array, notify: true, value: [] }
+        },
+        observers: [
+          '_debug(limits)'
+        ],
+        _handleResponse: function(response) {
+          console.log('LIMITS RESPONSE: ', response);
+          const idMap = {};
+          response.detail.__data__.response.forEach(function(record) {
+            idMap[record.apiName] = record;
+          });
+          this.set('idMap', idMap);
+          if (response.detail.__data__.response.length === 1) {
+            this.set('idList', response.detail.__data__.response[0]);
+          }
+          console.log('====> RELEVANT: ', this.idMap, this.idList);
+        },
+        _buildUrl: function(baseUrl, type) {
+          console.log('---- Generating the REST URL for: relevant');
+          if (baseUrl === undefined || type === undefined) {
+            return undefined;
+          } else {
+            return baseUrl + '/services/data/v37.0/sobjects/relevantItems?sobjects=' + type;
+          }
+        },
+        _computeHeader: function(accessToken) {
+          return {'Authorization': 'Bearer ' + accessToken}
+        },
+        _debug: function(a,b) {
+          console.log('DEBUG', a, b);
+        },
+        ready: function() {
+          console.log('Element tm-sfdc-relevant has been created.');
+        }
+      });
+    })(window.Polymer);
+  </script>
+</dom-module>
