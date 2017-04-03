@@ -1,5 +1,5 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
-<dom-module id="tm-sfdc-instance">
+<dom-module id="tm-sfdc-parent">
   <template>
     <style>
       :host {
@@ -7,18 +7,19 @@
       }
     </style>
     <iron-ajax id="ajax" auto
-      method="GET" url="[[_buildUrl(baseUrl,type,recordId)]]"
+      method="GET" url="[[_buildUrl(baseUrl,type,recordId,parentType)]]"
       headers="[[_computeHeader(accessToken)]]"
       handle-as="json" on-response="_handleResponse"></iron-ajax>
   </template>
   <script>
     (function(Polymer) {
       Polymer({
-        is: 'tm-sfdc-instance',
+        is: 'tm-sfdc-parent',
         properties: {
           baseUrl: { type:String, notify:true },
           accessToken: { type: String, notify: true },
           type: { type: String, notify: true },
+          parentType: { type: String, notify: true },
           recordId: { type: String, notify: true },
           record: { type: Object, notify: true, value: [] }
         },
@@ -26,24 +27,23 @@
           '_debug(record)'
         ],
         _handleResponse: function(response) {
-          console.log('OBJECT RESPONSE: ', response);
+          //console.log('PARENT RESPONSE: ', response);
           const object = response.detail.__data__.response;
-          console.log('====> OBJECTS: ', object);
+          console.log('====> PARENT OBJECTS: ', object);
           this.record = object;
         },
-        _buildUrl: function(baseUrl,type,recordId) {
-          const url = baseUrl + '/services/data/v37.0/sobjects/' + type + '/' + recordId;
-          console.log('---- INSTANCE URL: ', url);
-          return baseUrl + '/services/data/v37.0/sobjects/' + type + '/' + recordId;
+        _buildUrl: function(baseUrl,type,recordId,parentType) {
+          return baseUrl + '/services/data/v37.0/sobjects/' + type + '/' + recordId + '/' + parentType + '/';
+
         },
         _computeHeader: function(accessToken) {
           return {'Authorization': 'Bearer ' + accessToken}
         },
         _debug: function(a,b) {
-          console.log('DEBUG', a, b);
+          console.log('PARENT DEBUG', a, b);
         },
         ready: function() {
-          console.log('Element tm-sfdc-instance has been created.');
+          console.log('Element tm-sfdc-parent has been created.');
         }
       });
     })(window.Polymer);

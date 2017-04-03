@@ -7,6 +7,8 @@
 <link rel="import" href="../tm-sfdc-object.html">
 <link rel="import" href="../tm-sfdc-relevant.html">
 <link rel="import" href="../tm-sfdc-instance.html">
+<link rel="import" href="../tm-sfdc-parent.html">
+<link rel="import" href="../tm-sfdc-fields.html">
 
 <dom-module id="demo-tm-sfdc">
   <template>
@@ -18,10 +20,13 @@
         padding: 20px;
         min-width:900px;
         width:900px;
-        overflow: scroll;
         margin-left:auto;
         margin-right: auto;
       }
+      div.scroll {
+        overflow: scroll;
+      }
+
       span.path {
         padding-left: 15px;
       }
@@ -46,12 +51,10 @@
       .active-true {
         color:blue;
       }
-
       table.services th:first-of-type, table.services td:first-of-type{
         text-align: right;
         padding-right: 10px;
       }
-
       table.services th, table.limits th td {
         text-align: left;
         padding-left: 10px;
@@ -61,49 +64,93 @@
     <iron-ajax
       auto
       method="GET"
-      url="../private/login-data.json"
+      url="../data/private/login-data.json"
       handle-as="json"
       last-response="{{loginData}}"></iron-ajax>
 
-    <tm-sfdc-login
-      url="[[loginData.auth_url]]"
-      client-id="[[loginData.client_id]]"
-      client-secret="[[loginData.client_secret]]"
-      username="[[loginData.username]]"
-      password="[[loginData.password]]"
-      response="{{oAuthData}}"
-      error-message="{{oAuthErrorMessage}}"></tm-sfdc-login>
+    <iron-ajax
+      auto
+      method="GET"
+      url="../data/object-metadata-field-names.json"
+      handle-as="json"
+      last-response="{{fieldNames}}"></iron-ajax>
 
-    <!-- <tm-sfdc-services
-      base-url="[[oAuthData.instance_url]]"
-      access-token="[[oAuthData.access_token]]"
-      service-list="{{serviceList}}"></tm-sfdc-services> -->
+    <iron-ajax
+      auto
+      method="GET"
+      url="../data/settings.json"
+      handle-as="json"
+      last-response="{{settings}}"></iron-ajax>
 
-    <!-- <tm-sfdc-limits
-      base-url="[[oAuthData.instance_url]]"
-      access-token="[[oAuthData.access_token]]"
-      limits="{{limits}}"></tm-sfdc-limits> -->
+    <template is="dom-if" if="[[settings.login]]" restamp="true">
+      <tm-sfdc-login
+        url="[[loginData.auth_url]]"
+        client-id="[[loginData.client_id]]"
+        client-secret="[[loginData.client_secret]]"
+        username="[[loginData.username]]"
+        password="[[loginData.password]]"
+        response="{{oAuthData}}"
+        error-message="{{oAuthErrorMessage}}"></tm-sfdc-login>
+    </template>
 
-    <!-- <tm-sfdc-object
-      base-url="[[oAuthData.instance_url]]"
-      access-token="[[oAuthData.access_token]]"
-      objects="{{objects}}"></tm-sfdc-object> -->
+    <template is="dom-if" if="[[settings.services]]" restamp="true">
+      <tm-sfdc-services
+        base-url="[[oAuthData.instance_url]]"
+        access-token="[[oAuthData.access_token]]"
+        service-list="{{serviceList}}"></tm-sfdc-services>
+    </template>
 
-    <tm-sfdc-relevant
-      base-url="[[oAuthData.instance_url]]"
-      access-token="[[oAuthData.access_token]]"
-      type="Needs_Analysis__c"
-      id-map="[[relevantIdMap]]"
-      id-list="{{relevantIdList}}"></tm-sfdc-relevant>
+    <template is="dom-if" if="[[settings.limits]]" restamp="true">
+      <tm-sfdc-limits
+        base-url="[[oAuthData.instance_url]]"
+        access-token="[[oAuthData.access_token]]"
+        limits="{{limits}}"></tm-sfdc-limits>
+    </template>
 
-    <tm-sfdc-instance
-      base-url="[[oAuthData.instance_url]]"
-      access-token="[[oAuthData.access_token]]"
-      type="Needs_Analysis__c"
-      record-id="[[recordId]]"
-      record="{{record}}"></tm-sfdc-instance>
+    <template is="dom-if" if="[[settings.objects]]" restamp="true">
+      <tm-sfdc-object
+        base-url="[[oAuthData.instance_url]]"
+        access-token="[[oAuthData.access_token]]"
+        objects="{{objects}}"></tm-sfdc-object>
+    </template>
 
-    <tm-app-structure app-title="SalesForce Browser" titles="Settings,Services,Limits,Objects,Relevant,Record" selected="0">
+    <template is="dom-if" if="[[settings.relevantIdList]]" restamp="true">
+      <tm-sfdc-relevant
+        base-url="[[oAuthData.instance_url]]"
+        access-token="[[oAuthData.access_token]]"
+        type="Needs_Analysis__c"
+        id-map="[[relevantIdMap]]"
+        id-list="{{relevantIdList}}"></tm-sfdc-relevant>
+    </template>
+
+    <template is="dom-if" if="[[settings.record]]" restamp="true">
+      <tm-sfdc-instance
+        base-url="[[oAuthData.instance_url]]"
+        access-token="[[oAuthData.access_token]]"
+        type="Needs_Analysis__c"
+        record-id="[[recordId]]"
+        record="{{record}}"></tm-sfdc-instance>
+    </template>
+
+    <template is="dom-if" if="[[settings.recordParent]]" restamp="true">
+      <tm-sfdc-parent
+        base-url="[[oAuthData.instance_url]]"
+        access-token="[[oAuthData.access_token]]"
+        type="Needs_Analysis__c"
+        parent-type="Lead__r"
+        record-id="[[recordId]]"
+        record="{{recordParent}}"></tm-sfdc-parent>
+    </template>
+
+    <template is="dom-if" if="[[settings.fields]]" restamp="true">
+      <tm-sfdc-fields
+        base-url="[[oAuthData.instance_url]]"
+        access-token="[[oAuthData.access_token]]"
+        type="Needs_Analysis__c"
+        fields="{{fields}}"></tm-sfdc-fields>
+    </template>
+
+    <tm-app-structure app-title="SalesForce Browser" titles="Settings,Services,Limits,Objects,Relevant,Need,Lead,Fields" selected="0">
       <div class="page">
         <paper-input label="Grant Type" value="password" disabled></paper-input>
         <paper-input label="OAuth2 URL" value="{{loginData.auth_url}}"></paper-input>
@@ -168,14 +215,81 @@
           <paper-input label="[[field.name]]" value="[[field.value]]"></paper-input>
         </template>
       </div>
+      <div class="page">
+        <template is="dom-repeat" items="[[_generateRecordData(recordParent)]]" as="field">
+          <paper-input label="[[field.name]]" value="[[field.value]]"></paper-input>
+        </template>
+      </div>
+      <div class="page">
+        <paper-datatable data="{{fields}}" selectable multi-selection>
+          <template is="dom-repeat" items="[[fieldNames]]" as="item">
+            <paper-datatable-column header="[[item]]" property="[[item]]" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          </template>
+        </paper-datatable>
+      </div>
+      <!-- <div class="page">
+        <paper-datatable data="{{fields}}" selectable multi-selection>
+          <paper-datatable-column header="aggregatable" property="aggregatable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="autoNumber" property="autoNumber" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="byteLength" property="byteLength" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="calculated" property="calculated" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="calculatedFormula" property="calculatedFormula" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="cascadeDelete" property="cascadeDelete" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="caseSensitive" property="caseSensitive" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="controllerName" property="controllerName" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="createable" property="createable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="custom" property="custom" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="defaultValue" property="defaultValue" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="defaultValueFormula" property="defaultValueFormula" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="defaultedOnCreate" property="defaultedOnCreate" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="dependentPicklist" property="dependentPicklist" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="deprecatedAndHidden" property="deprecatedAndHidden" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="digits" property="digits" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="displayLocationInDecimal" property="displayLocationInDecimal" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="encrypted" property="encrypted" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="externalId" property="externalId" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="extraTypeInfo" property="extraTypeInfo" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="filterable" property="filterable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="filteredLookupInfo" property="filteredLookupInfo" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="groupable" property="groupable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="highScaleNumber" property="highScaleNumber" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="htmlFormatted" property="htmlFormatted" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="idLookup" property="idLookup" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="inlineHelpText" property="inlineHelpText" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="label" property="label" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="length" property="length" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="maskType" property="maskType" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="nameField" property="nameField" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="namePointing" property="namePointing" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="nillable" property="nillable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="permissionable" property="permissionable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="picklistValues" property="picklistValues" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="precision" property="precision" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="queryByDistance" property="queryByDistance" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="referenceTargetField" property="referenceTargetField" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="referenceTo" property="referenceTo" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="relationshipName" property="relationshipName" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="relationshipOrder" property="relationshipOrder" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="restrictedDelete" property="restrictedDelete" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="restrictedPicklist" property="restrictedPicklist" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="scale" property="scale" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="soapType" property="soapType" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="sortable" property="sortable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="type" property="type" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="unique" property="unique" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="updateable" property="updateable" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+          <paper-datatable-column header="writeRequiresMasterRead" property="writeRequiresMasterRead" sortable><template><span>[[value]]</span></template></paper-datatable-column>
+        </paper-datatable>
+      </div> -->
     </tm-app-structure>
-
   </template>
   <script>
+  // /services/data/v37.0/sobjects/Needs_Analysis__c/describe
     (function(Polymer) {
       Polymer({
         is: 'demo-tm-sfdc',
         properties: {
+          settings: { type: Object, notify: true },
           loginData: { type: Object, notify: true },
           oAuthData: { type: Object, notify: true },
           oAuthErrorMessage: { type: String, notify: true },
@@ -186,12 +300,18 @@
           relevantIdList: { type: Array, notify: true, value: [] },
           recordId: { type: String, notify:true, computed: '_computeRecordId(relevantIdList,selectedRelivantId)' },
           record: { type: Object, notify: true, value: {} },
+          recordParent: { type: Object, notify:true },
           selectedRelivantId: { type: Number, notify: true, value: 0 },
-          selectedService: { type: Number, notify: true, value: 0 }
+          selectedService: { type: Number, notify: true, value: 0 },
+          fields: { type: Array, notify: true },
+          fieldNames: { type: Array, notify: true }
         },
         observers: [
-          'debug(recordId)'
+          'debug(recordParent)'
         ],
+        _fieldNames: function(fields) {
+          return Object.keys(fields);
+        },
         _computeRecordId: function(relevantIdList,selectedRelivantId) {
           if (relevantIdList.recordIds === undefined) {
             return undefined;

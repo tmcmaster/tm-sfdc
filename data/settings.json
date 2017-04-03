@@ -1,0 +1,10 @@
+{
+  "login": true,
+  "services": false,
+  "limits": false,
+  "objects": false,
+  "relevantIdList": false,
+  "record": false,
+  "recordParent": false,
+  "fields": true
+}

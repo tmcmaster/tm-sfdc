@@ -24,7 +24,7 @@
           '_debug(limits)'
         ],
         _handleResponse: function(response) {
-          console.log('LIMITS RESPONSE: ', response);
+          console.log('====> OBJECTS RESPONSE: ', response);
           const objects = response.detail.__data__.response.sobjects;
           console.log('====> OBJECTS: ', objects);
           this.objects = objects;
